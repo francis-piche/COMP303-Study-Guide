@@ -387,5 +387,68 @@ You would normally create a test class \texttt{DayTest} for example, that extend
 The importance of documentation is self-evident. Javadoc is a tool that auto-generates an HTML file based on specially formatted comments in your code. They always begin with \texttt{/**} (rather than just /*). We then use the @ symbol to specify attributes. (for example: @author Francis Pich\'e, @return int) 
 \\ \linebreak
 Since it gets converted to HTML, you can actually inject html into the comments to add custom formatting!
-\part{Design Patterns}
+
+\part{Modeling}
+
+Software design is the idea of planning before coding. Abstractions and architecture are used to create a full model before beginning the implementation.
+\\ \linebreak
+The development (which would be done by the programmers) is controlled by the designer by using effective communication, strong OO constructs, and unit testing. The requirements are described by contracts, generalized code and UML (or some other modeling method). 
+\\ \linebreak
+
+\section{UML Class Diagrams}
+This diagram describes all classes, data structures, objects and what they contain. 
+\\ \linebreak
+You could exhaustively go and model every possible attribute, method etc. But this is really hard to do since it's almost impossible for a designer to forsee every method a programmer would need, without writing anything himself. 
+\\ \linebreak
+In this class, we will make minimal diagrams, where we specify only the minimal variables and methods.
+\\ \linebreak
+You could also make hybrid responsibility diagrams, where instead of specifying methods you would write a "responsibility" description. (Not done in this course)
+\\ \linebreak
+A basic class would look like:
+\\
+\includegraphics{basic_class}
+\\
+Where the + means public and the - means private.
+\\ \linebreak
+\subsection{Relations}
+Since classes often depend and use each other, we need a way to depict this.
+\\ \linebreak
+\begin{itemize}
+	\item Association : class A calls a method in class B
+	\item Inheritance : A extends B
+	\item Realization / Implementation : A implements B  
+	\item Dependency : A assumes something about B but doesn't use it directly.
+	\item Aggregation : see below
+	\item Composition : see below
+	\item Undirected : Relation in an undefined way.
+\end{itemize}
+Aggregation and composition are a little weird to understand. (At least for me!) Class A aggregates class B, if class B can exist without the existence of class A. Meanwhile, Class A composes class B if class B cannot exist without being within class A. \url{https://www.visual-paradigm.com/guide/uml-unified-modeling-language/uml-aggregation-vs-composition/}
+\\ \linebreak
+These relationships are expressed with these arrows: (in order)\\
+\includegraphics[scale=0.5]{arrows}
+\\
+Note that having TONS of arrows is probably a good indication of bad design.
+\\ \linebreak
+We can also express multiplicity by adding $n..m$ or $0..*$ etc. To show there should be between $n$ to $m$ instances, or $0$ to $\infty$ instances.
+\\ \linebreak
+\subsection{Examples}
+\subsubsection{House}
+	\includegraphics[]{house}
+	\\
+	The main method is most likely inside House, since most instantiations are coming out of house.
+	\\ \linebreak
+	In this picture, a House must have exactly 1 Kitchen, 1 Bathroom, and 1 to many Bedrooms. All of those extend Room. A Mortgage is somehow related, and can exist or not. A Mailbox is given to the house, but not necessarily part of it. (aggregation).
+	\\ \linebreak
+	There is actually a problem with this. Is Mailbox static? If not, then it must be instantiated by something. But this picture says it must be static, but it's also associated to the House using an aggregation, which means it must be instantiated.
+	\\ \linebreak
+	We could make this correct by adding another Main class which instantiates Mailbox (and possibly House if we don't want it to be static).
+	\textbf{Always think of what needs to be instantiated!!!}
+
+\subsubsection{University}
+\includegraphics[]{university}
+\\
+Here we are adding labels to the associations. These describe what the relationship actually is. 
+\\ \linebreak
+Notice that Professor has no methods, since they aren't important and we are doing a hybrid responsibility here (even though we said we wouldn't do those!). Meanwhile, Enrollment has some methods since they are important to understanding the situation and requirements.
+
 \end{document}
