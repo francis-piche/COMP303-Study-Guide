@@ -450,5 +450,22 @@ We can also express multiplicity by adding $n..m$ or $0..*$ etc. To show there s
 Here we are adding labels to the associations. These describe what the relationship actually is. 
 \\ \linebreak
 Notice that Professor has no methods, since they aren't important and we are doing a hybrid responsibility here (even though we said we wouldn't do those!). Meanwhile, Enrollment has some methods since they are important to understanding the situation and requirements.
+\\ \linebreak
+
+\section{Sequence Diagram}
+This is a use-case view of the system. Here we look at (in detail) what one part of the system will do in order. Very narrow and explicit.
+\\ \linebreak
+A class diagram does not explain the order (sequence) in which the program executes.
+\\ \linebreak
+In these we have a "timeline" representing execution flow, from left to right. The dotted lines coming down vertically break up the timeline into pieces by class. If the line is dotted the whole way down, the class is not executing, if there is a box, the class is executing. Solid arrows mean a method is being called, dotted arrows mean a value is being returned.
+\\ \linebreak
+We can add actors, who initiate the use cases.
+\\ \linebreak
+Loops and alternates are used to represent "for, while" and "or" (do not think about it as an if statement, since its not specified what the condition is.)
+\\ \linebreak
+
+\section{Activity Diagram}
+Is essentially a flow chart of that the program should do. It can be for a single method, or a use case.
+\\ \linebreak
 
 \end{document}
