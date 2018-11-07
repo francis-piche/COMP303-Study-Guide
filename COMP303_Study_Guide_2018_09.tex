@@ -467,5 +467,65 @@ Loops and alternates are used to represent "for, while" and "or" (do not think a
 \section{Activity Diagram}
 Is essentially a flow chart of that the program should do. It can be for a single method, or a use case.
 \\ \linebreak
+This is more abstract and general than the sequence diagram, since it does not contain actual return values and methods, just plain words to describe whats happening.
+\\ \linebreak
+Note that there can be only one starting point, and can be many end points. 
+\\ \linebreak
+We can also make a multi-actor and object diagram, where we break up the diagram into columns of groups, and then individual actors. All actions regarding that actor fall within its column.
+
+\part{Design Patterns}
+The point of design patterns is to have a way of documenting language agnostic solutions to common software engineering problems. Often this is represented in UMl.
+\\ \linebreak
+A design pattern contains:
+\begin{itemize}
+	\item Title
+	\item Long description of the problem
+	\item Full description of the solution using UML
+\end{itemize}
+
+\section{Composite Pattern}
+From the wiki:
+\\ \linebreak
+"A part-whole hierarchy should be represented so that clients can treat the part and whole objects uniformly."
+\\ \linebreak
+Basically, one object contains a list of others which implement a common interface so that they can be called together.
+\\ \linebreak
+\includegraphics{composite}
+\\
+Here, both Leaf and Composite implement the Primitive interface. The method() of Composite simply calls the method() of all the Leaves which it contains. 
+\\ \linebreak
+This can be used to allow for individual Leaf objects to call method() by themselves, or be part of some greater Composite, and be called together.
+\\ \linebreak
+Example:
+\begin{lstlisting}
+
+class Team implements CompositeInterface{
+	private ArrayList<T> team = new ArrayList<S>(); //Generic 
+	public void deductHitPoint(int n){
+		for(T member : this.team){
+			member.deductHitPoint(n);
+		}
+	}
+}
+
+class Soldier implements SoldierInterface{
+	private float hp;
+	public void deductHitPoint(int n){
+		this.hp -= n;
+	}
+}
+
+interface CompositeInterface{
+	public void deductHitPoint(int n);
+}
+\end{lstlisting}
+
+\section{Decorator Pattern}
+Suppose we want to add a feature to a method in an existing class. We use a decorator to add functionality.
+\\ \linebreak
+In Java we can write a new method, override or simply overwrite. This is different from a wrapper since we are not wrapping a primitive, we are wrapping classes. When classes are wrapped, we do not call it wrapping.
+\\ \linebreak
+For example: Arrow and Magic Arrow should behave and be treated the same, except that Magic Arrow will have some extra functionality onto it.
+\\ \linebreak
 
 \end{document}
