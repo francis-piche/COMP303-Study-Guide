@@ -474,7 +474,7 @@ Note that there can be only one starting point, and can be many end points.
 We can also make a multi-actor and object diagram, where we break up the diagram into columns of groups, and then individual actors. All actions regarding that actor fall within its column.
 
 \part{Design Patterns}
-The point of design patterns is to have a way of documenting language agnostic solutions to common software engineering problems. Often this is represented in UMl.
+The point of design patterns is to have a way of documenting language agnostic solutions to common software engineering problems. Often this is represented in UML.
 \\ \linebreak
 A design pattern contains:
 \begin{itemize}
@@ -500,7 +500,11 @@ Example:
 \begin{lstlisting}
 
 class Team implements CompositeInterface{
-	private ArrayList<T> team = new ArrayList<S>(); //Generic 
+	//Arraylist of CompositeInterface means we don't necessarily need all members of team to be same type
+	//The deduct hitpoint could be different for each type of teammember
+	private ArrayList<CompositeInterface> team = new ArrayList<>();
+	
+	//Call the deductHitPoint for each member of the team
 	public void deductHitPoint(int n){
 		for(T member : this.team){
 			member.deductHitPoint(n);
@@ -508,7 +512,8 @@ class Team implements CompositeInterface{
 	}
 }
 
-class Soldier implements SoldierInterface{
+//Same interface as the composite object (the Team)
+class Soldier implements CompositeInterface{
 	private float hp;
 	public void deductHitPoint(int n){
 		this.hp -= n;
@@ -520,12 +525,339 @@ interface CompositeInterface{
 }
 \end{lstlisting}
 
+
 \section{Decorator Pattern}
-Suppose we want to add a feature to a method in an existing class. We use a decorator to add functionality.
+\includegraphics{decorator}\\
+\subsection{When is it used?}
+The Decorator pattern is used when you have an object that cannot or should not be modified, but we want to add extra functionality to. 
 \\ \linebreak
-In Java we can write a new method, override or simply overwrite. This is different from a wrapper since we are not wrapping a primitive, we are wrapping classes. When classes are wrapped, we do not call it wrapping.
+You might notice that the UML is very similar to the Composite, but there is only 1 Component in the Decorator composite object. 
 \\ \linebreak
-For example: Arrow and Magic Arrow should behave and be treated the same, except that Magic Arrow will have some extra functionality onto it.
+
+\subsection{How does it work?}
+\begin{lstlisting}
+class ExampleRunner{
+	public static void main(){
+		ConcreteComponent c = new ConcreteComponent();
+		Decorator d = new Decorator();
+		
+		double random = Math.random()*10;
+		if(random > 5){
+			d.method();
+		}else{
+			c.method();
+		}
+	}
+
+}
+
+interface Component{
+	public void method();
+}
+
+class ConcreteComponent implements Component{
+
+	//Empty constructor for example
+	public ConcreteComponent(){}
+	
+	//Implement the interface method
+	public void method(){
+		//Do stuff
+	}
+}
+
+class Decorator implements Component{
+
+	//Composed of exactly one Component
+	Component c;
+	
+	//Notice the interface type being used, so we could decorate decorators easily too!
+	Decorator(Component c){
+		this.c = c;
+	}
+	
+	//Decorator only works if you need not modify intermediate steps inside the method() of the ConcreteComponent. Must be able to just use end result.
+	public void method(){
+		this.c.method();
+		//Do extra stuff 
+	}
+}
+\end{lstlisting}
+
+\subsection{Discussion}
+We could also combine both the Decorator and Composite together. By having a 3rd class which implements the common interface, it could be composed of several Decorated (and non decorated) objects!
 \\ \linebreak
+Also, note that using inheritance instead of interfaces is not the same thing. In inheritance, we would only allow decorators in the same inheritance tree. We could not decorate two objects with the same decorator if those two objects are not in the same inheritance tree. This would lead us to only add functionality through evolution down the tree. 
+We would also lose the reference to objects further along the inheritance tree, since we wouldn't have a direct reference to the base object. 
+\\ \linebreak
+
+\section{Iterator}
+\includegraphics{iterator}\\
+\subsection{When is it used?}
+The Iterator can be used whenever we want to traverse across an object, independent of what the object is. It could be a LinkedList, ArrayList, Tree, Graph, etc. The iterator would work for all of them. So it is useful in cases when you don't necessarily know the datatype of what you'll be iterating over, or if you want to specify custom iteration behavior (for example BFS vs DFS on a Tree). 
+\\ \linebreak
+\subsection{How does it work?}
+The client depends on both the Iterator interface and the Aggregate interface. They do not depend on eachother, but the client makes them work together through some control structure. The iterator interface always has the following methods:
+\begin{itemize}
+	\item next()
+	\item hasNext()
+	\item currentItem()
+\end{itemize}
+The Aggregate interface contains a \texttt{getIterator()} method.  We then need two classes. One implementing the Iterator interface, the other implementing the Aggregate. 
+\\ \linebreak
+Often, the iterator class will be nested and private inside the Aggregate class, then the way they are accessed from the client is by calling the getIterator() method from the Aggregator, and calling next() until hasNext() returns false. 
+
+\begin{lstlisting}
+	public interface Iterator{
+		public Object next();
+		public boolean hasNext();
+		public Object currentItem();
+	}
+	
+	public interface Aggregate{
+		public Iterator getIterator();
+	}
+	
+	public class ConcreteAggregate{
+		//Some datastructure, doesn't matter which.
+		private Tree<String> data = //Some data
+		
+		public Iterator getIterator(){
+			return new ConcreteIterator();
+		}
+		
+		//Private class to encapsulate the iterator.
+		private class ConcreteIterator{
+			TreeNode currentNode = data.root;
+			
+			//Just pseudocode
+			@Override
+			public boolean hasNext(){
+				if(currentNode.children != null){
+					return true;
+				}
+				return false;
+			}
+			
+			@Override
+			public TreeNode next(){
+				if(this.hasNext()){
+					//you get the idea
+				}
+				
+				return null;
+			}
+		}
+	}
+	
+	//Now we can easily iterate through without caring about the details.
+	public ClientExample{
+		public static void main(String[] args){
+			ConcreteAggregate example = new ConcreteAggregate();
+			
+			for(Iterator iter = example.getIterator(); iter.hasNext;){
+				//Do stuff
+				TreeNode next = iter.next();
+			}
+			
+			/*Note that in Java 8, you can use the enhanced for loop on anything that implements the iterator interface (built into Java).
+			for(TreeNode t : example.getIterator())*/
+		}
+	}
+\end{lstlisting}
+
+\section{Singleton}
+\includegraphics{singleton}
+\subsection{When is it used?}
+The Singleton is used when we want to ensure that only one instance of the class ever exists at one time.
+\subsection{How does it work?}
+To understand the Singleton, it's important to understand the \texttt{static} keyword in Java. By now you probably know that Java is built on C. Essentially, objects boil down to structs in C. The difference, then, between static and non-static is that static allows the thing to be created compile time only. (Cannot be malloced).
+\\ \linebreak
+We use this to ensure that only one instance of the singleton is created. 
+
+\begin{lstlisting}
+public class Singleton{
+
+	//Notice the private static 
+	private static SingleTon instance = null;
+	
+	//Hide the constructor
+	private Singleton(){}
+	
+	//Controlled static access to the singleton
+	public static Singleton getInstance(){
+
+		//Only create the instance if it's the first time this is called.
+		if(this.instance == null){
+			this.instance = new Singleton();
+		}
+	
+		return this.instance;
+	}
+	
+}
+\end{lstlisting}
+So now, the compiler will give an error if anyone tries to do \texttt{Singleton singleton = new Singleton()} from outside the singleton class, since the constructor is private. 
+\\ \linebreak
+We can also use this to wrap other objects to make them singletons as well, by having them as a private class in the Singleton file. 
+
+\section{MVC}
+\includegraphics{mvc}\\
+The Model View Controller is a \textbf{style} or set of similar design patterns that provide a solution to the same use-case. The idea is that most applications can be divided into three parts. The controller, model, and view. The controller is the interface between the User and the Model that, well, controls how data is updated. The Model is all the data, and the View is the visual representation of the data seen by the user.
+\subsection{When is it used?}
+This is used whenever the above described behavior is what describes your system. There can be many views, many controllers and many models. The ratio's between them are not always 1:1. We use this style when we want all of these things to be updated simultaneously. For example, a use presses a button. The controller updates the model data, and the view is updated to match the data. There could be multiple views for one model (think bar chart and pie chart for the same data), data may be manipulated by several controllers.
+\\ \linebreak
+The canonical example of this is the Java Swing library. 
+ller will have an array list of  
+\subsection{How does it work?}
+Basically, the idea is just to separate the concepts into different classes. Your Controller class should only be responsible for:
+\begin{itemize}
+	\item Handling user input
+	\item Updating the Model(s)
+	\item Displaying the View(s)
+\end{itemize}
+To do this, normally the controller keeps a reference to the Model(s) and the View(s), and has a method for updating and displaiyng.
+\begin{lstlisting}
+class Model {
+	//Data stuff
+	
+	//Could be different/more complex, this is just an example for simplicity.
+	void update(){
+	}
+}
+
+class View {
+	//Visual stuff (printing, GUI, etc)
+	
+	void display(){
+		//Do all the displaying
+	}
+}
+
+class Controller{
+	private Model m;
+	private View v;
+	
+	
+	//Update is the only method that the developer will have to call. This can take parameters if needed.
+	void update(){
+		m.update();
+		v.display();	
+	}
+}
+\end{lstlisting}
+ 
+It is also common to see the controller and view together in one class, this is known as MVC1 (as opposed to MVC2 described previously). In this case,  it's more of a "interactive window" idea.
+\\ \linebreak
+Multiple models and views can be implemented using \textbf{registration}. The idea there, is that the Controller has instead a list of Models/ Views. "Registering" a view/model is just adding one to the Controller's list.
+\\ \linebreak
+We can also modify this so that the Model can notify the View of changes, rather than the controller managing this. This is known as MVC with \textbf{Notification}. In this way, the Controller only updates the Model, which then tells all relevant views to repaint themselves. In this one, the Views need to be registered with the Model, not the Controller. This way is often done with the Observer design pattern. 
+
+
+\section{Observer}
+\includegraphics{observer}
+\subsection{When is it used?}
+The Observer pattern is used whenever there is a one to many relationship in which a change in one object is to cause a notification in the relevant objects automatically.
+
+\subsection{How does it work?}
+The Subject class keeps a list of Observer objects (objects that implement Observer interface), and calls notify on all of them when a change is made to the Subject class. It also is responsible for handling attaching and detaching Observers from itself. Sometimes the Observers are an abstract class with a reference to the Subject, so they can attach themselves. Otherwise this is handled outside the pattern. 
+\\ \linebreak
+This is essentially what is happening with the MVC design pattern with notification. 
+
+
+\section{Strategy}
+\includegraphics{strategy}
+\\
+\subsection{When is it used?}
+Suppose you have a class that could benefit from having several different implementations of similar logic.You want to do this in such a way that the implementation logic can be swapped out dynamically, with good encapsulation.
+\\ \linebreak
+Now, one could have a bunch of if-statements or a switch-statement to handle which to use, or we could use the Strategy pattern to implement better code.
+
+\subsection{How does it work?}
+Essentially, we have a Strategy interface which will be implemented by the different "Strategies" for solving a problem. In a LayoutManager, these would be the exact layouts, BorderLayout, FormLayout etc.
+\\ \linebreak
+Then, the Context class determines which one of these strategies is used, and how.
+\\ \linebreak
+For example, we could have an avatar which uses two different AI techniques (strategies) to implement it's decision making. These can be changed depending on the context.
+\\ \linebreak
+We could also combine the Strategy design pattern with itself, by having multiple interfaces that extend eachother.
+\begin{lstlisting}
+interface Behavior{
+	void doAction();
+}
+
+interface Thinking extends Behavior{
+	Behavior think();
+}
+
+class Strategy implements Thinking{
+	Behavior b;
+	
+	Behavior think(){
+		//Decide which behavior to do
+		return b;
+	}
+	
+	void doAction(){
+		//Do crazy stuff
+	}
+}
+
+class Avatar {
+	Thinking thinker = new Strategy();
+	public void doThink(){
+		Behavior b = thinker.think();
+		b.doAction();
+	}
+}
+\end{lstlisting}
+So there, the Strategy decides which Behavior to use, (assume there are several), and then this can be used by the avatar to complete the action.
+
+\section{Template}
+\includegraphics{template}
+\subsection{When is it used?}
+Say you have an algorithm that has many similar steps, but some that may vary in their implementation. How can we avoid duplicate code? 
+\\ \linebreak
+
+\subsection{How does it work?}
+By using an abstract class, we can implement a template method, in which each step may or may not be unique. If it is unique to the implementation, then it should be declared abstract. Otherwise, it can be implemented in the abstract class.
+\\ \linebreak
+\begin{lstlisting}
+abstract class ShoppingCart{
+	bool makePayment(double amount){
+		String info = paymentInfo();
+		int ptr = connect(info);
+		bool answer = pay(ptr, amount);
+		return answer;
+	}
+	
+	abstract String paymentInfo();
+	abstract connect(String connectionInfo);
+	abstract bool pay(int connectID, double amount);
+}
+\end{lstlisting}
+
+\section{Visitor}
+\subsection{When is it used?}
+
+
+\subsection{How does it work?}
+
+\section{Factory}
+\subsection{When is it used?}
+
+\subsection{How does it work?}
+
+\section{Adapter}
+\subsection{When is it used?}
+
+\subsection{How does it work?}
+
+\section{Command}
+\subsection{When is it used?}
+
+\subsection{How does it work?}
+
+\part{Threads}
 
 \end{document}
