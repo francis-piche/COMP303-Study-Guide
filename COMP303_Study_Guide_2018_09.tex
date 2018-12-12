@@ -835,29 +835,249 @@ abstract class ShoppingCart{
 	abstract connect(String connectionInfo);
 	abstract bool pay(int connectID, double amount);
 }
+
 \end{lstlisting}
 
 \section{Visitor}
-\subsection{When is it used?}
+\includegraphics{visitor}
 
+\subsection{When is it used?}
+Suppose we want to modify (add methods) to classes of many different types without having to alter those classes too much.
+\\ \linebreak
+Easy! The Visitor pattern allows you to add a method (or several) to several classes by making those classes implement the Acceptor interface. Then, you specify the behavior of all your methods in the a class which extends visitor.
 
 \subsection{How does it work?}
+
+\begin{lstlisting}
+interface Visitor{
+
+	public double visit(SomeClass1 c1);
+	public double visit(SomeClass2 c2);
+	public double visit(SomeClass3 c3);
+}
+
+interface Acceptor{
+	//This is the only change that will need to be made to your classes to make them work with visitor design pattern
+	public double accept(Visitor v);
+}
+
+class ConcreteVisitor implements Visitor{
+	public double visit(SomeClass1 c1){
+		//Do something specific to SomeClass1
+	}
+	public double visit(SomeClass2 c2){
+		//Do something specific to SomeClass2
+	}
+	public double visit(SomeClass3 c3){
+		//Do something specific to SomeClass3
+	}
+}
+
+class SomeClass1 extends Acceptor{
+	
+	//Some class stuff
+	
+	public double accept(Visitor visitor){
+		visitor.visit(this); // Pass reference to yourself so the Visitor class knows what to do
+	}
+
+	
+}
+
+class SomeClass2 extends Acceptor{
+
+	//Some class stuff
+	public double accept(Visitor visitor){
+		visitor.visit(this); // Pass reference to yourself so the Visitor class knows what to do
+	}
+
+}
+
+
+\end{lstlisting}
+
+The problem with this is that we need to know all of the classes which will need to extend the Acceptor interface. If there is a finite number of them then fine, but when we add a new class we need to remember to add it to the interfaces!
 
 \section{Factory}
+\includegraphics{factory}
 \subsection{When is it used?}
+Suppose we want to create an object at runtime, but we want to randomize the type of that object within a hierarchy. So if you have a bunch of Enemy classes that extend Enemy, say, and you want to generate a random type of enemy. The Factory is used to decide which enemy is created.
+\\ \linebreak
+Alternatively, you can generate classes which implement a common interface as well, rather that within a hierarchy. This can be useful when separating logical components, and when using in conjunction with other patterns. (Maybe generating a Strategy for example)
+\\ \linebreak
 
 \subsection{How does it work?}
+
+\begin{lstlisting}
+interface Factory{
+	public Product factoryMethod();
+}
+
+interface Product{
+	//Some interface, abstract class or class
+}
+
+class Prod1 implements Product{
+	//Some stuff
+}
+
+class Prod2 implements Product{
+	//Some other stuff
+}
+
+class EnemyFactory implements Factory{
+	public Product factoryMethod(){
+		double random = Math.random();
+		return (random > 0.5)? new Prod1() : new Prod2(); 
+	}
+}
+\end{lstlisting}
+
 
 \section{Adapter}
-\subsection{When is it used?}
-
-\subsection{How does it work?}
+NOT COVERED FOR FINAL
 
 \section{Command}
-\subsection{When is it used?}
-
-\subsection{How does it work?}
+NOT COVERED FOR FINAL
 
 \part{Threads}
 
+Java threads in 15 minutes or less. LETS DO IT.
+\\ \linebreak
+\section{Threads in General}
+Parallel execution my dudes. Threads do that. They share all the same variables and memory though so be careful! Make sure you use proper exclusion techniques to elegantly deal with race conditions.
+\\ \linebreak
+Race condition: Something that can go bad if theres two things modifying it at the same time. Note that something as seemingly harmless as \texttt{i++} can lead to race conditions. (Think what is i++ doing at the assembler level. It's made up of a read, and a write. So if one thread writes while another tries to read, boom your i is corrupt). 
+\subsection{Mutual Exclusion}
+Dealing with race conditions always involves using locks.
+\\ \linebreak
+Basically, locks will allow one (or more, depending on how you set them up), threads to enter a section of code, but will block all others from entering until the lock is released. 
+\\ \linebreak
+How this is done in Java is below:
+
+\section{Java Threads}
+Apparently Java is nice for multithreading. Not that we would know, we never got practice in this course.
+\\ \linebreak
+In Java, if you want your class to be able to run as a thread, you have to extend the Runnable interface. Then, you implement the run() method in your class.
+\\ \linebreak
+When you're ready to start your program, call start(). It's good practice to have a try catch block in your run() method since the thread could get interrupted, so you want to catch InterruptedException. It's also good practice to call Thread.sleep(DELAY); to give other threads a chance to run (since Java threads have no preemption, if you know what that is. Otherwise don't worry about it). 
+\\ \linebreak
+You can kill your threads by calling t.interrupt(). This could cause an interrupted exception if the thread was inside a wait(), sleep() or join().
+
+\subsection{Run vs Start}
+Calling run() is usually a mistake, since it won't actually create a new thread of execution (ie, your program won't speed up). However, if for some reason you want to execute the code you wrote inside run() inside the current thread of execution, go for it ;).
+
+\subsection{Java Locks}
+The simplest way to lock a critical section is to use the ReentrantLock() in Java.
+\begin{lstlisting}
+ReentrantLock lock = new ReentrantLock();
+lock.lock();
+try{
+
+}catch{//handle some error maybe
+}finally{
+	lock.unlock();
+}
+\end{lstlisting}
+
+\subsection{Conditions}
+Conditions are a way of extracting the Object monitor methods (if you don't know what monitors are then don't worry about it). Basically, they can be used to have conditional waits.
+\begin{lstlisting}
+class BoundedBuffer{
+	pubic int size = 0;
+	
+	private Lock queueLock = new ReentrantLock();
+	private Condition full = queueLock.newCondition();
+	private Condition empty = queueLock.newCondition();
+	
+	public void add(E newValue){
+		queueLock.lock();
+		try{
+			while(size == elemnts.length){
+				full.await(); //Block any threads that try to add
+			}
+			elemnts.add(newValue);
+			size++;
+		}finally{
+			queueLock.unlock();
+		}		
+	}
+	
+	public void remove(){
+		queueLock.lock();
+		try{
+			while(size == 0){
+				empty.await(); //Block any threads that try to add
+			}
+			full.signal(); //Wake up one sleeping thread.
+			elemnts.add(newValue);
+			size--;
+		}finally{
+			queueLock.unlock();
+		}
+	}
+}
+
+\end{lstlisting}
+
+Not used in the above example is signalAll(); which wakes up ALL threads which are waiting on a condition.
+\\ \linebreak
+\subsection{Synchronized}
+The Synchronized keyword in Java will implicitly lock your method so that no two threads can execute it at the same time.
+\begin{lstlisting}
+public void synchronized superFastProgram(){	//Non-static so only this instance is synchronized
+	//sensitive stuff
+
+}
+
+public static void synchronized superFastProgram(){
+
+} //Static so ALWAYS synchronized
+
+public void doThing(){
+
+	//Can synchronize single blocks
+	synchronized(this){
+		
+	}
+}
+\end{lstlisting}
+
+\subsection{join()}
+Join is often really badly explained so lemme try to make it simple.
+\\ \linebreak
+In short, t.join() makes the thread which executed that line to wait until t.run() completes.
+\\ \linebreak
+So if you do:
+\begin{lstlisting}
+
+t1.start(); //Prints some stuff
+System.out.println("banana");
+\end{lstlisting}
+You may end up seeing banana printed before the code of t1 can execute. To fix this:
+\begin{lstlisting}
+t1.start();
+
+try{
+	t1.join();
+}catch(InterruptedException e){
+}
+System.out.println("banana");
+\end{lstlisting}
+This forces t1 to finish before the print can happen.
+\\ \linebreak
+This does not affect other threads started in the same level. Say you have two threads: t1, t2.
+
+\begin{lstlisting}
+t1.start();
+t2.start();
+
+try{
+	t1.join()
+}catch blaba
+
+System.out.println("banana");
+\end{lstlisting}
+The banana gets printed after t1 finishes, but leaves no guarantee that t2 has finished.
+ 
 \end{document}
