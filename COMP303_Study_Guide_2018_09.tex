@@ -705,10 +705,8 @@ We can also use this to wrap other objects to make them singletons as well, by h
 \includegraphics{mvc}\\
 The Model View Controller is a \textbf{style} or set of similar design patterns that provide a solution to the same use-case. The idea is that most applications can be divided into three parts. The controller, model, and view. The controller is the interface between the User and the Model that, well, controls how data is updated. The Model is all the data, and the View is the visual representation of the data seen by the user.
 \subsection{When is it used?}
-This is used whenever the above described behavior is what describes your system. There can be many views, many controllers and many models. The ratio's between them are not always 1:1. We use this style when we want all of these things to be updated simultaneously. For example, a use presses a button. The controller updates the model data, and the view is updated to match the data. There could be multiple views for one model (think bar chart and pie chart for the same data), data may be manipulated by several controllers.
+This is used whenever the above described behavior is what describes your system. There can be many views, many controllers and many models. The ratio's between them are not always 1:1. We user this style when we want all of these things to be updated simultaneously. For example, a use presses a button. The controller updates the model data, and the view is updated to match the data. There could be multiple views for one model (think bar chart and pie chart for the same data), data may be manipulated by several controllers.
 \\ \linebreak
-The canonical example of this is the Java Swing library. 
-ller will have an array list of  
 \subsection{How does it work?}
 Basically, the idea is just to separate the concepts into different classes. Your Controller class should only be responsible for:
 \begin{itemize}
